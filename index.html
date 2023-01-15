@@ -5,12 +5,21 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>牛了个牛</title>
+  <title>鹰了个兔</title>
+  <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
+<script>
+  // VConsole will be exported to `window.VConsole` by default.
+  var vConsole = new window.VConsole();
+</script>
 </head>
 
 <body>
   <div id="app"></div>
   <script type="module" src="/src/main.ts"></script>
+  <script nomodule>
+    console.log('your browsers can not supports es modules! please upgrade it.')
+    alert('your browsers can not supports es modules! please upgrade it.')
+  </script>
 </body>
 
 </html>

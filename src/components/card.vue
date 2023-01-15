@@ -3,22 +3,41 @@ import { computed } from 'vue'
 const props = defineProps<Props>()
 const emit = defineEmits(['clickCard'])
 
+const fontImage = {
+  1: "🦅",
+  2: "🐭",
+  3: "🐮",
+  4: "🐯",
+  5: "🐰",
+  6: "🐲",
+  7: "🐍",
+  8: "🐎",
+  9: "🐒",
+  10: "🐔",
+  11: "🐶",
+  12: "🐷",
+  13: "我",
+  14: "爱",
+  15: "你",
+}
+
 // 加载图片资源
-const modules = import.meta.glob('../assets/cow2/*.png', {
-  as: 'url',
-  import: 'default',
-  eager: true,
-})
-const IMG_MAP = Object.keys(modules).reduce((acc, cur) => {
-  const key = cur.replace('../assets/cow2/', '').replace('.png', '')
-  acc[key] = modules[cur]
-  return acc
-}, {} as Record<string, string>)
+// const modules = import.meta.glob('../assets/cow2/*.png', {
+//   as: 'url',
+//   import: 'default',
+//   eager: true,
+// })
+// const IMG_MAP = Object.keys(modules).reduce((acc, cur) => {
+//   const key = cur.replace('../assets/cow2/', '').replace('.png', '')
+//   acc[key] = modules[cur]
+//   return acc
+// }, {} as Record<string, string>)
 
 interface Props {
   node: CardNode
   isDock?: boolean
 }
+// 卡片是否被覆盖了：主要看它的父亲的状态，换句话说，只要它的父亲有一个可以被点击，那么它就不能被点击
 const isFreeze = computed(() => {
   return props.node.parents.length > 0 ? props.node.parents.some(o => o.state < 2) : false
 },
@@ -38,7 +57,8 @@ function handleClick() {
   >
     <!-- {{ node.zIndex }}-{{ node.type }} -->
     <!-- {{ node.id }} -->
-    <img :src="IMG_MAP[node.type]" width="40" height="40" :alt="`${node.type}`">
+    <!-- <img v-if="node.type > 4" :src="IMG_MAP[node.type]" width="40" height="40" :alt="`${node.type}`"> -->
+    <div text-27px >{{ fontImage[node.type as keyof typeof fontImage] }}</div>
     <div v-if="isFreeze" class="mask" />
   </div>
 </template>

@@ -8,15 +8,19 @@ const defaultGameConfig: GameConfig = {
 }
 
 export function useGame(config: GameConfig): Game {
+  // 这里利用展开运算符，config里的属性会覆盖defaultGameConfig中的属性
   const { container, delNode, events = {}, ...initConfig } = { ...defaultGameConfig, ...config }
   const histroyList = ref<CardNode[]>([])
   const backFlag = ref(false)
   const removeFlag = ref(false)
   const removeList = ref<CardNode[]>([])
   const preNode = ref<CardNode | null>(null)
+  /**
+   * 存放所有的node
+   */
   const nodes = ref<CardNode[]>([])
   const indexSet = new Set()
-  let perFloorNodes: CardNode[] = []
+  let preFloorNodes: CardNode[] = []
   const selectedNodes = ref<CardNode[]>([])
   const size = 40
   let floorList: number[][] = []
@@ -27,12 +31,21 @@ export function useGame(config: GameConfig): Game {
     })
   }
 
+  /**
+   * 选中了一个节点
+   * - 从可选节点中删除
+   * - 判断是否有可消除的节点
+   * - 添加到槽位中
+   * @param node 
+   * @returns 
+   */
   function handleSelect(node: CardNode) {
-    if (selectedNodes.value.length === 7)
+    if (selectedNodes.value.length === 7) // 槽位已经满了，按理不应该出现这种情况
       return
     node.state = 2
     histroyList.value.push(node)
     preNode.value = node
+    // 从待选的列表中删除
     const index = nodes.value.findIndex(o => o.id === node.id)
     if (index > -1)
       delNode && nodes.value.splice(index, 1)
@@ -42,6 +55,7 @@ export function useGame(config: GameConfig): Game {
     if (selectedSomeNode.length === 2) {
       // 第二个节点索引
       const secondIndex = selectedNodes.value.findIndex(o => o.id === selectedSomeNode[1].id)
+      // 先把选中的节点插进去，这里可以优化
       selectedNodes.value.splice(secondIndex + 1, 0, node)
       // 为了动画效果添加延迟
       setTimeout(() => {
@@ -60,13 +74,12 @@ export function useGame(config: GameConfig): Game {
           events.dropCallback && events.dropCallback()
         }
       }, 100)
-    }
-    else {
+    } else {
       events.clickCallback && events.clickCallback()
       const index = selectedNodes.value.findIndex(o => o.type === node.type)
-      if (index > -1)
+      if (index > -1) // 有一个相同节点
         selectedNodes.value.splice(index + 1, 0, node)
-      else
+      else // 没有相同的节点，就加到最后
         selectedNodes.value.push(node)
       // 判断卡槽是否已满，即失败
       if (selectedNodes.value.length === 7) {
@@ -120,28 +133,34 @@ export function useGame(config: GameConfig): Game {
     preNode.value = null
     nodes.value = []
     indexSet.clear()
-    perFloorNodes = []
+    preFloorNodes = []
     selectedNodes.value = []
     floorList = []
     const isTrap = trap && floor(random(0, 100)) !== 50
 
     // 生成节点池
     const itemTypes = (new Array(cardNum).fill(0)).map((_, index) => index + 1)
+    console.log(itemTypes);
     let itemList: number[] = []
+    // 每个节点要有3张牌，所以要乘以3
     for (let i = 0; i < 3 * layerNum; i++)
       itemList = [...itemList, ...itemTypes]
 
     if (isTrap) {
+      // 如果有trap，那么把最后几张牌删除，这样就有可能不全了
       const len = itemList.length
       itemList.splice(len - cardNum, len)
     }
     // 打乱节点
     itemList = shuffle(shuffle(itemList))
+    console.log(`打乱后的节点是：${itemList}`)
 
     // 初始化各个层级节点
     let len = 0
     let floorIndex = 1
     const itemLength = itemList.length
+    // 把卡片列表itemList进行分割，并把分割后的片段装进floorList，每个片段代表一层
+    // 每次分割，最多放楼层平方数量的的卡片，卡片分布在边长为楼层的正方形的上
     while (len <= itemLength) {
       const maxFloorNum = floorIndex * floorIndex
       const floorNum = ceil(random(maxFloorNum / 2, maxFloorNum))
@@ -149,26 +168,31 @@ export function useGame(config: GameConfig): Game {
       len += floorNum
       floorIndex++
     }
+    (window as any).aa = container;
     const containerWidth = container.value!.clientWidth
     const containerHeight = container.value!.clientHeight
     const width = containerWidth / 2
     const height = containerHeight / 2 - 60
 
+    // 对每个楼层进行加工
     floorList.forEach((o, index) => {
+      // o是楼层卡片的数组，数组元素的数字代表卡片的类型
+      // index+1 是楼层索引
       indexSet.clear()
       let i = 0
       const floorNodes: CardNode[] = []
       o.forEach((k) => {
         i = floor(random(0, (index + 1) ** 2))
-        while (indexSet.has(i))
+        while (indexSet.has(i)) // 一直找到一个不包含的i
           i = floor(random(0, (index + 1) ** 2))
-        const row = floor(i / (index + 1))
-        const column = index ? i % index : 0
+        // 行多，列少，会重复吗？
+        const row = floor(i / (index + 1)) // 计算出卡片在楼层区域的行
+        const column = index ? i % index : 0 // 计算出卡片在楼层区域的列
+        console.log(`楼层是：${index},图层中索引是：${i},${index ? i % index : 0}:${i%(index+1)}`)
         const node: CardNode = {
           id: `${index}-${i}`,
           type: k,
-          zIndex:
-        index,
+          zIndex: index,
           index: i,
           row,
           column,
@@ -177,8 +201,9 @@ export function useGame(config: GameConfig): Game {
           parents: [],
           state: 0,
         }
+        // 计算当前的node覆盖了谁
         const xy = [node.top, node.left]
-        perFloorNodes.forEach((e) => {
+        preFloorNodes.forEach((e) => {
           if (Math.abs(e.top - xy[0]) <= size && Math.abs(e.left - xy[1]) <= size)
             e.parents.push(node)
         })
@@ -186,13 +211,16 @@ export function useGame(config: GameConfig): Game {
         indexSet.add(i)
       })
       nodes.value = nodes.value.concat(floorNodes)
-      perFloorNodes = floorNodes
+      preFloorNodes = floorNodes
     })
 
     updateState()
   }
 
   return {
+    /**
+     * 所有node
+     */
     nodes,
     selectedNodes,
     removeFlag,

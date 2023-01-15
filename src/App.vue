@@ -99,14 +99,23 @@ function handleLose() {
 
 onMounted(() => {
   initData()
+  // winAudioRef.value?.play();
 })
 </script>
 
 <template>
   <div flex flex-col w-full h-full>
-    <div text-44px text-center w-full color="#000" fw-600 h-60px flex items-center justify-center mt-10px>
-      牛了个牛
+    <div class="index-module_audioWrapper_8XXL9" fixed top-8px right-8px h-32px w-32px z-9999  >
+      <audio loop="true" src="https://mdn.alipayobjects.com/huamei_0prmtq/afts/file/A*Nvh6SY9l38QAAAAAAAAAAAAADvuFAQ"></audio>
+      <img w-32px src="https://gw.alipayobjects.com/mdn/rms_567af2/afts/img/A*5-t5TqRL0jYAAAAAAAAAAAAAARQnAQ">
     </div>
+    <div text-40px text-center w-full color="#000" fw-600 h-60px flex items-center justify-center mt-10px>
+      🦅了个🐰
+    </div>
+    <div text-20px text-center w-full color="#000" fw-600 h-40px flex items-center justify-center>
+      多玩玩，hange保你兔年常鹰（阴）
+    </div>
+    <!-- 主要的容器 -->
     <div ref="containerRef" flex-1 flex>
       <div w-full relative flex-1>
         <template v-for="item in nodes" :key="item.id">
@@ -124,6 +133,7 @@ onMounted(() => {
           成功加入兔圈~
         </div>
       </transition>
+      
       <transition name="bounce">
         <div v-if="showTip" color="#000" flex items-center justify-center w-full text-28px fw-bold>
           第{{ curLevel + 1 }}关
@@ -161,13 +171,13 @@ onMounted(() => {
       </button>
     </div>
     <div w-full color="#000" fw-600 text-center pb-10px flex style="display: flex;justify-content: center;align-items: center">
-      <span mr-20px>Create By: summer-is-hot</span>
+      <span mr-20px>Create By: hange</span>
       <a
         class="icon-btn"
         color="#000"
         i-carbon-logo-github
         rel="noreferrer"
-        href="https://github.com/summmer-is-hot/cow_and_cow"
+        href="https://github.com/qinlinwang"
         target="_blank"
         title="GitHub"
       />

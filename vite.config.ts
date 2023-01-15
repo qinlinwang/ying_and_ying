@@ -9,9 +9,9 @@ export default defineConfig({
         Unocss(),
     ],
     server: {
-        host: 'localhost', //ip地址
+        host: '0.0.0.0', //ip地址
         port: 3008, //端口号
         open: true //启动后是否自动打开浏览器
     },
-    base: process.env.NODE_ENV === 'production' ? 'https://summmer-is-hot.github.io/cow_and_cow/' : '/',
+    base: process.env.NODE_ENV === 'production' ? 'https://yinglegetu.netlify.app' : '/',
 })
